@@ -71,9 +71,7 @@ func (restClient *Client) formatRequestPayload(api *api.RestAPI) (io.Reader, err
 				return nil, err
 			}
 
-		case "octet-stream":
-		case "plain":
-		case "html":
+		case "octet-stream", "plain", "html":
 			reqBytes = api.RequestObject().([]byte)
 
 		}
