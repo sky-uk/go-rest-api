@@ -50,17 +50,27 @@ import(
 ### Getting the response object
 
 ```
-    respObj := *api.ResponseObject().(*<proper response object type>)
 
     // example (json payload)
-
     type JSONFoo struct {
 	    Fields map[string]string `json:"fields"`
     }
 
-    respObj := *api.ResponseObject().(*JSONFoo)
+    // Prepare a request...
+    api := api.NewRestAPI(
+        http.MethodGet,         // request method
+        "/",                    // request path
+        nil,                    // request payload object
+        new(JSONFoo),           // (pointer to) response payload object
+        nil,                    // (pointer to) error object
+    )
 
+    //...perform request...
+
+    respObj := *api.ResponseObject().(*JSONFoo)
 ```
+
+More examples for the supported encodings in the client_test.go module.
 
 ### Getting response status code
 

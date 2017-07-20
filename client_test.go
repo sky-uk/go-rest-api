@@ -155,3 +155,23 @@ func TestHttpXMLReq(t *testing.T) {
 	resp := *api.ResponseObject().(*XMLFoo)
 	assert.Equal(t, "bar", resp.Foo)
 }
+
+func TestHttpOctetStreamReq(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Write([]byte(`ouitybw50ybvqy9yt8b6983p8v93`))
+	}))
+	defer ts.Close()
+
+	client := NewClient(ts.URL, "", "", false, true, nil)
+
+	api := api.NewRestAPI(http.MethodGet, "/", nil, new([]byte), nil)
+	err := client.Do(api)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+	assert.Equal(t, http.StatusOK, api.StatusCode())
+	buffer := *api.ResponseObject().(*[]byte)
+	assert.Equal(t, []byte("ouitybw50ybvqy9yt8b6983p8v93"), buffer)
+}

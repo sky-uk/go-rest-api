@@ -136,6 +136,7 @@ func (restClient *Client) handleResponse(apiObj *api.RestAPI, res *http.Response
 
 	apiObj.SetStatusCode(res.StatusCode)
 	bodyText, err := ioutil.ReadAll(res.Body)
+	fmt.Printf("-------------> BODY:\n%v", bodyText)
 	if err != nil {
 		log.Println("ERROR reading response: ", err)
 		return err
@@ -187,7 +188,7 @@ func (restClient *Client) handleResponse(apiObj *api.RestAPI, res *http.Response
 			}
 
 		case "octet-stream":
-			apiObj.SetResponseObject(bodyText)
+			apiObj.SetResponseObject(&bodyText)
 
 		case "plain", "html":
 			data := string(bodyText)
