@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 	"fmt"
-	"github.com/sky-uk/go-rest-api/api"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -65,7 +64,7 @@ func setupWrongHeader(statusCode int, responseBody string) {
 func TestHappyCase(t *testing.T) {
 	setup(200, "pong")
 	client = NewClient(server.URL, user, password, ignoreSSL, debug, nil)
-	apiRequest := api.NewRestAPI(http.MethodGet, "/", nil, nil, nil)
+	apiRequest := NewBaseAPI(http.MethodGet, "/", nil, nil, nil)
 
 	err := client.Do(apiRequest)
 
@@ -78,7 +77,7 @@ func TestBasicAuthFailure(t *testing.T) {
 	setup(0, "")
 	client = NewClient(server.URL, "invalidUser", "invalidPass", ignoreSSL, debug, nil)
 
-	apiRequest := api.NewRestAPI(http.MethodGet, "/", nil, nil, nil)
+	apiRequest := NewBaseAPI(http.MethodGet, "/", nil, nil, nil)
 	err := client.Do(apiRequest)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
@@ -96,7 +95,7 @@ func TestHttpReq(t *testing.T) {
 	defer ts.Close()
 
 	client := NewClient(ts.URL, "", "", false, true, nil)
-	api := api.NewRestAPI(http.MethodGet, "/", nil, new(string), nil)
+	api := NewBaseAPI(http.MethodGet, "/", nil, new(string), nil)
 	err := client.Do(api)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
@@ -126,7 +125,7 @@ func TestHttpJSONReq(t *testing.T) {
 
 	client := NewClient(ts.URL, "", "", false, true, nil)
 
-	api := api.NewRestAPI(http.MethodGet, "/", nil, new(JSONFoo), nil)
+	api := NewBaseAPI(http.MethodGet, "/", nil, new(JSONFoo), nil)
 	err := client.Do(api)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
@@ -146,7 +145,7 @@ func TestHttpXMLReq(t *testing.T) {
 
 	client := NewClient(ts.URL, "", "", false, true, nil)
 
-	api := api.NewRestAPI(http.MethodGet, "/", nil, new(XMLFoo), nil)
+	api := NewBaseAPI(http.MethodGet, "/", nil, new(XMLFoo), nil)
 	err := client.Do(api)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
@@ -166,7 +165,7 @@ func TestHttpOctetStreamReq(t *testing.T) {
 
 	client := NewClient(ts.URL, "", "", false, true, nil)
 
-	api := api.NewRestAPI(http.MethodGet, "/", nil, new([]byte), nil)
+	api := NewBaseAPI(http.MethodGet, "/", nil, new([]byte), nil)
 	err := client.Do(api)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
