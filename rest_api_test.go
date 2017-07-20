@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"encoding/json"
@@ -20,7 +20,7 @@ type ReqErrorItem struct {
 	ErrorInfo map[string]interface{} `json:"error_info"`
 }
 
-func TestRestApi(t *testing.T) {
+func TestBaseApi(t *testing.T) {
 	method := "myMethod"
 	endpoint := "/myEndpoint"
 	requestObject := string("")
@@ -41,7 +41,7 @@ func TestRestApi(t *testing.T) {
 	rawResponse := []byte("some server response in []byte")
 	err := errors.New("an error")
 
-	api := NewRestAPI(method, endpoint, requestObject, responseObject, errorObject)
+	api := NewBaseAPI(method, endpoint, requestObject, responseObject, errorObject)
 
 	api.SetStatusCode(statusCode)
 	api.SetRawResponse(rawResponse)

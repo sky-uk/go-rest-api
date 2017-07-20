@@ -7,7 +7,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/sky-uk/go-rest-api/api"
 	"github.com/sky-uk/go-rest-api/contenttype"
 	"io"
 	"io/ioutil"
@@ -46,7 +45,7 @@ type Client struct {
 	Headers   map[string]string
 }
 
-func (restClient *Client) formatRequestPayload(api *api.RestAPI) (io.Reader, error) {
+func (restClient *Client) formatRequestPayload(api *BaseAPI) (io.Reader, error) {
 
 	var requestPayload io.Reader
 
@@ -89,7 +88,7 @@ func (restClient *Client) formatRequestPayload(api *api.RestAPI) (io.Reader, err
 }
 
 // Do - makes the API call.
-func (restClient *Client) Do(api *api.RestAPI) error {
+func (restClient *Client) Do(api *BaseAPI) error {
 
 	requestURL := fmt.Sprintf("%s%s", restClient.URL, api.Endpoint())
 
@@ -132,7 +131,7 @@ func (restClient *Client) Do(api *api.RestAPI) error {
 	return restClient.handleResponse(api, res)
 }
 
-func (restClient *Client) handleResponse(apiObj *api.RestAPI, res *http.Response) error {
+func (restClient *Client) handleResponse(apiObj *BaseAPI, res *http.Response) error {
 
 	apiObj.SetStatusCode(res.StatusCode)
 	bodyText, err := ioutil.ReadAll(res.Body)
