@@ -26,7 +26,8 @@ import(
         Password: password, 
         IgnoreSSL: ignoreSSL, 
         Debug: debug, 
-        Headers: headers
+        Headers: headers,
+        Timeout: 30     // in seconds
     } 
 
     // for a simple http client...
