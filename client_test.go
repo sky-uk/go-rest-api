@@ -15,7 +15,7 @@ var user = "nsxUser"
 var password = "nsxPass"
 var ignoreSSL = true
 var debug = true
-var client *Client
+var client Client
 
 var server *httptest.Server
 
@@ -42,7 +42,14 @@ func setup(statusCode int, responseBody string) {
 		}))
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/json"
-	client = NewClient(server.URL, user, password, ignoreSSL, debug, headers)
+	client = Client{
+		URL:       server.URL,
+		User:      user,
+		Password:  password,
+		IgnoreSSL: ignoreSSL,
+		Debug:     debug,
+		Headers:   headers,
+	}
 }
 
 func setupWrongHeader(statusCode int, responseBody string) {
@@ -59,12 +66,25 @@ func setupWrongHeader(statusCode int, responseBody string) {
 		}))
 	headers := make(map[string]string)
 	headers["Content-Type"] = "foo/bar"
-	client = NewClient(server.URL, user, password, ignoreSSL, debug, headers)
+	client = Client{
+		URL:       server.URL,
+		User:      user,
+		Password:  password,
+		IgnoreSSL: ignoreSSL,
+		Debug:     debug,
+		Headers:   headers,
+	}
 }
 
 func TestHappyCase(t *testing.T) {
 	setup(200, "pong")
-	client = NewClient(server.URL, user, password, ignoreSSL, debug, nil)
+	client = Client{
+		URL:       server.URL,
+		User:      user,
+		Password:  password,
+		IgnoreSSL: ignoreSSL,
+		Debug:     debug,
+	}
 	apiRequest := NewBaseAPI(http.MethodGet, "/", nil, nil, nil)
 
 	err := client.Do(apiRequest)
@@ -76,7 +96,13 @@ func TestHappyCase(t *testing.T) {
 
 func TestBasicAuthFailure(t *testing.T) {
 	setup(0, "")
-	client = NewClient(server.URL, "invalidUser", "invalidPass", ignoreSSL, debug, nil)
+	client = Client{
+		URL:       server.URL,
+		User:      "invalidUser",
+		Password:  "invalidPass",
+		IgnoreSSL: ignoreSSL,
+		Debug:     debug,
+	}
 
 	apiRequest := NewBaseAPI(http.MethodGet, "/", nil, nil, nil)
 	err := client.Do(apiRequest)
@@ -95,7 +121,10 @@ func TestHttpReq(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "", "", false, true, nil)
+	client := Client{
+		URL:   ts.URL,
+		Debug: true,
+	}
 	api := NewBaseAPI(http.MethodGet, "/", nil, new(string), nil)
 	err := client.Do(api)
 	if err != nil {
@@ -126,7 +155,7 @@ func TestHttpJSONResp(t *testing.T) {
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/json"
-	client := NewClient(ts.URL, "", "", false, true, nil)
+	client := Client{URL: ts.URL, Debug: true}
 
 	api := NewBaseAPI(http.MethodGet, "/", nil, new(JSONFoo), nil)
 	err := client.Do(api)
@@ -148,7 +177,7 @@ func TestHttpXMLResp(t *testing.T) {
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/xml"
-	client := NewClient(ts.URL, "", "", false, true, headers)
+	client := Client{URL: ts.URL, Debug: true, Headers: headers}
 
 	api := NewBaseAPI(http.MethodGet, "/", nil, new(XMLFoo), nil)
 	err := client.Do(api)
@@ -170,7 +199,7 @@ func TestHttpOctetStreamResp(t *testing.T) {
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/octet-stream"
-	client := NewClient(ts.URL, "", "", false, true, headers)
+	client := Client{URL: ts.URL, Debug: true, Headers: headers}
 
 	api := NewBaseAPI(http.MethodGet, "/", nil, new([]byte), nil)
 	err := client.Do(api)
@@ -185,12 +214,10 @@ func TestHttpOctetStreamResp(t *testing.T) {
 func TestHttpNoBodyResp(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//w.Header().Set("Content-Type", "application/octet-stream")
-		//w.Write([]byte(`ouitybw50ybvqy9yt8b6983p8v93`))
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "", "", false, true, nil)
+	client := Client{URL: ts.URL, Debug: true}
 
 	api := NewBaseAPI(http.MethodGet, "/", nil, new([]byte), nil)
 	err := client.Do(api)
@@ -217,7 +244,7 @@ func TestHttpErrorObjectBack(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "", "", false, true, nil)
+	client := Client{URL: ts.URL, Debug: true}
 
 	api := NewBaseAPI(http.MethodGet, "/", nil, new([]byte), new(ErrStruct))
 	err := client.Do(api)
@@ -256,7 +283,11 @@ func TestHttpRequestPayload(t *testing.T) {
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/json"
-	client := NewClient(ts.URL, "", "", false, true, headers)
+	client := Client{
+		URL:     ts.URL,
+		Headers: headers,
+		Timeout: 10,
+	}
 
 	var reqPayload ReqBody
 	reqPayload.FieldOne = "Foo"
