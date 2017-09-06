@@ -21,7 +21,7 @@ var server *httptest.Server
 
 const (
 	unauthorizedStatusCode = http.StatusForbidden
-	unauthorizedResponse   = "anauthorized"
+	unauthorizedResponse   = "unauthorized"
 )
 
 func hasHeader(req *http.Request, name string, value string) bool {
@@ -231,8 +231,8 @@ func TestHttpNoBodyResp(t *testing.T) {
 
 type ErrStruct struct {
 	ErrID   string `json:"error_id"`
-	ErrCode string `json:"error_code"`
-	ErrText string `json:"error_text"`
+	ErrCode string `json:"error_code,omitempty"`
+	ErrText string `json:"error_text,omitempty"`
 }
 
 func TestHttpErrorObjectBack(t *testing.T) {
@@ -240,7 +240,7 @@ func TestHttpErrorObjectBack(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error_id":"001","error_code":"12345","error_text":"Foo bar"}`))
+		w.Write([]byte(`{"error_id":"resource.not_found","error_text":"Resource '/api/tm/3.8/config/active/monitor' does not exist"}`))
 	}))
 	defer ts.Close()
 
@@ -251,8 +251,7 @@ func TestHttpErrorObjectBack(t *testing.T) {
 	if err != nil {
 		assert.Equal(t, http.StatusInternalServerError, api.StatusCode())
 		errStruct := api.ErrorObject().(*ErrStruct)
-		assert.Equal(t, "001", errStruct.ErrID)
-		assert.Equal(t, "12345", errStruct.ErrCode)
+		assert.Equal(t, "resource.not_found", errStruct.ErrID)
 	}
 }
 
