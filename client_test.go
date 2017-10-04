@@ -179,14 +179,14 @@ func TestHttpXMLResp(t *testing.T) {
 	headers["Content-Type"] = "application/xml"
 	client := Client{URL: ts.URL, Debug: true, Headers: headers}
 
-	api := NewBaseAPI(http.MethodGet, "/", nil, new(XMLFoo), nil)
+	out := new(XMLFoo)
+	api := NewBaseAPI(http.MethodGet, "/", nil, out, nil)
 	err := client.Do(api)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
 	assert.Equal(t, http.StatusOK, api.StatusCode())
-	resp := *api.ResponseObject().(*XMLFoo)
-	assert.Equal(t, "bar", resp.Foo)
+	assert.Equal(t, "bar", out.Foo)
 }
 
 func TestHttpOctetStreamResp(t *testing.T) {
@@ -201,14 +201,36 @@ func TestHttpOctetStreamResp(t *testing.T) {
 	headers["Content-Type"] = "application/octet-stream"
 	client := Client{URL: ts.URL, Debug: true, Headers: headers}
 
-	api := NewBaseAPI(http.MethodGet, "/", nil, new([]byte), nil)
+	out := new([]byte)
+	api := NewBaseAPI(http.MethodGet, "/", nil, out, nil)
 	err := client.Do(api)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
 	assert.Equal(t, http.StatusOK, api.StatusCode())
-	buffer := *api.ResponseObject().(*[]byte)
-	assert.Equal(t, []byte("ouitybw50ybvqy9yt8b6983p8v93"), buffer)
+	assert.Equal(t, []byte("ouitybw50ybvqy9yt8b6983p8v93"), *out)
+}
+
+func TestHttpPlainTextResp(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/plain")
+		w.Write([]byte("plain text"))
+	}))
+	defer ts.Close()
+
+	headers := make(map[string]string)
+	headers["Content-Type"] = "application/octet-stream"
+	client := Client{URL: ts.URL, Debug: true, Headers: headers}
+
+	out := new(string)
+	api := NewBaseAPI(http.MethodGet, "/", nil, out, nil)
+	err := client.Do(api)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+	assert.Equal(t, http.StatusOK, api.StatusCode())
+	assert.Equal(t, "plain text", *out)
 }
 
 func TestHttpNoBodyResp(t *testing.T) {
