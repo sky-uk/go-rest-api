@@ -184,17 +184,21 @@ func (restClient *Client) handleResponse(apiObj *BaseAPI, res *http.Response) er
 			}
 
 		case "octet-stream":
-			// assume you passed a pointer to []byte...
 			if apiObj.ResponseObject() != nil {
-				pstream := apiObj.ResponseObject().(*[]byte)
-				*pstream = bodyText
+				if pstream, is := apiObj.ResponseObject().(*[]byte); is {
+					*pstream = bodyText
+				} else {
+					log.Println("[WARN]: Response object expected to be *[]byte")
+				}
 			}
 
 		case "plain", "html":
-			// assume you passed a pointer to string
 			if apiObj.ResponseObject() != nil {
-				pstream := apiObj.ResponseObject().(*string)
-				*pstream = string(bodyText)
+				if pstream, is := apiObj.ResponseObject().(*string); is {
+					*pstream = string(bodyText)
+				} else {
+					log.Println("[WARN]: Response object expected to be *string")
+				}
 			}
 
 		default:
