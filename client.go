@@ -184,11 +184,18 @@ func (restClient *Client) handleResponse(apiObj *BaseAPI, res *http.Response) er
 			}
 
 		case "octet-stream":
-			apiObj.SetResponseObject(&bodyText)
+			// assume you passed a pointer to []byte...
+			if apiObj.ResponseObject() != nil {
+				pstream := apiObj.ResponseObject().(*[]byte)
+				*pstream = bodyText
+			}
 
 		case "plain", "html":
-			plainStr := string(bodyText)
-			apiObj.SetResponseObject(&plainStr)
+			// assume you passed a pointer to string
+			if apiObj.ResponseObject() != nil {
+				pstream := apiObj.ResponseObject().(*string)
+				*pstream = string(bodyText)
+			}
 
 		default:
 			log.Printf("Content type %s not supported yet", contentType)
